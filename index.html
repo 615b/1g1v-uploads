@@ -401,7 +401,7 @@
             
             <div class="link-result" id="linkResult">
                 <div class="link-container">
-                    <div class="link-url" id="generatedLink">https://1g1v.url/uploads/abcd1234</div>
+                    <div class="link-url" id="generatedLink">https://https://615b.github.io/1g1v.github.io/u/abcd1234</div>
                     <button class="copy-button" id="copyButton">Copy Link</button>
                 </div>
                 <div class="copy-success" id="copySuccess">Link copied to clipboard!</div>
@@ -446,6 +446,20 @@
             const generatedLink = document.getElementById('generatedLink');
             const copyButton = document.getElementById('copyButton');
             const copySuccess = document.getElementById('copySuccess');
+            
+            // Get GitHub username from URL or use placeholder
+            const getGitHubUsername = () => {
+                // Try to extract from current URL (if already deployed to GitHub Pages)
+                const currentUrl = window.location.hostname;
+                if (currentUrl.includes('github.io')) {
+                    return currentUrl.split('.')[0];
+                }
+                // Default to placeholder - user will need to replace this with their GitHub username
+                return '615b';
+            };
+            
+            const githubUsername = getGitHubUsername();
+            const repoName = '1g1v-uploads'; // Use your actual repo name here
             
             // Files storage
             const files = [];
@@ -619,7 +633,9 @@
                 
                 // Generate a random URL for the upload
                 const randomId = generateRandomString();
-                const uploadUrl = `https://1g1v.url/uploads/${randomId}`;
+                
+                // Create a GitHub Pages compatible URL
+                const uploadUrl = `https://${githubUsername}.github.io/${repoName}/u/${randomId}`;
                 
                 // Update the link display
                 generatedLink.textContent = uploadUrl;
@@ -636,6 +652,10 @@
                     .catch(err => {
                         console.error('Failed to copy: ', err);
                     });
+                    
+                // In a real implementation, you would need to handle the actual file upload here
+                // For GitHub Pages, you would typically need a backend service to handle file uploads
+                // This is just generating working preview links that follow GitHub Pages URL structure
             });
         });
     </script>
