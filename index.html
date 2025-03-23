@@ -608,32 +608,42 @@
         });
         
         // Handle generate button click
-        generateButton.addEventListener('click', async function() {
-            if (files.length === 0) {
-                alert('Please select at least one file to upload.');
-                return;
-            }
+generateButton.addEventListener('click', async function() {
+    if (files.length === 0) {
+        alert('Please select at least one file to upload.');
+        return;
+    }
 
-            const file = files[0]; // Assuming single file upload
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async function () {
-                const base64Data = reader.result.split(',')[1];
+    const file = files[0]; // Assuming single file upload
+    const formData = new FormData();
+    formData.append('file', file); // Append the file to FormData
 
-                const response = await fetch('/api/upload', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ file: base64Data, filename: file.name }),
-                });
+    try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData, // Send FormData (not JSON)
+        });
 
-                const result = await response.json();
-                if (response.ok) {
-                    generatedLink.textContent = `https://615b-github-io.vercel.app${result.url}`;
-                    linkResult.style.display = 'block';
-                } else {
-                    alert('Upload failed');
-                }
-            };
+        // Check if the response is valid
+        if (!response.ok) {
+            throw new Error('Upload failed with status: ' + response.status);
+        }
+
+        const result = await response.json();
+
+        // Check if the response contains the expected URL
+        if (result.url) {
+            generatedLink.textContent = `https://615b-github-io.vercel.app${result.url}`;
+            linkResult.style.display = 'block';
+        } else {
+            alert('Upload failed, no URL returned.');
+        }
+    } catch (err) {
+        console.error('Upload failed:', err);
+        alert('There was an error uploading the file. Please try again.');
+    }
+});
+
         });
     });
 </script>
