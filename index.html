@@ -401,7 +401,7 @@
             
             <div class="link-result" id="linkResult">
                 <div class="link-container">
-                    <div class="link-url" id="generatedLink">https:1g1v-github-io.vercel.app/u/abcd1234</div>
+                    <div class="link-url" id="generatedLink">https://https://615b.github.io/1g1v.github.io/u/abcd1234</div>
                     <button class="copy-button" id="copyButton">Copy Link</button>
                 </div>
                 <div class="copy-success" id="copySuccess">Link copied to clipboard!</div>
@@ -625,24 +625,34 @@
             });
             
             // Handle generate button click
-            generateButton.addEventListener('click', function() {
-                if (files.length === 0) {
-                    alert('Please select at least one file to upload.');
-                    return;
-                }
-                
-                // Generate a random URL for the upload
-                const randomId = generateRandomString();
-                
-                // Create a GitHub Pages compatible URL
-                const uploadUrl = `https://${githubUsername}-github-io.vercel.app/${repoName}/u/${randomId}`;
-                
-                // Update the link display
-                generatedLink.textContent = uploadUrl;
-                linkResult.style.display = 'block';
-                
-                // Automatically copy to clipboard
-                navigator.clipboard.writeText(uploadUrl)
+generateButton.addEventListener('click', async function() {
+    if (files.length === 0) {
+        alert('Please select at least one file to upload.');
+        return;
+    }
+
+    const file = files[0]; // Assuming single file upload
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async function () {
+        const base64Data = reader.result.split(',')[1];
+
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file: base64Data, filename: file.name }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            generatedLink.textContent = `https://615b-github-io.vercel.app${result.url}`;
+            linkResult.style.display = 'block';
+        } else {
+            alert('Upload failed');
+        }
+    };
+});
+
                     .then(() => {
                         copySuccess.style.display = 'block';
                         setTimeout(() => {
