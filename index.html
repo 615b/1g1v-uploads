@@ -375,10 +375,15 @@
                             <line x1="12" y1="3" x2="12" y2="15"></line>
                         </svg>
                     </div>
-                    <p class="upload-text">Drag and drop your files here or click to browse</p>
-                    <p class="upload-hint">Supports images, videos, folders and other files (Max: 50MB)</p>
+<p class="upload-text">Drag and drop your files here or click to browse</p>
+<p class="upload-hint">Supports images, videos, folders, and other files (Max: 50MB)</p>
+
+<!-- File Input (hidden) -->
 <input type="file" id="fileInput" style="display: none;" multiple>
+
+<!-- Upload Button -->
 <button id="uploadButton">Upload Files</button>
+
 
                 </div>
                 
@@ -429,247 +434,208 @@
         <p>© 2025 1G1V UPLOADS | The ultimate Discord embed generator</p>
     </footer>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropArea = document.getElementById('dropArea');
-            const fileInput = document.getElementById('fileInput');
-            const filesList = document.getElementById('filesList');
-            const embedTitle = document.getElementById('embedTitle');
-            const author = document.getElementById('author');
-            const embedDescription = document.getElementById('embedDescription');
-            const previewTitle = document.getElementById('previewTitle');
-            const authorName = document.getElementById('authorName');
-            const authorIcon = document.getElementById('authorIcon');
-            const previewDescription = document.getElementById('previewDescription');
-            const previewImage = document.getElementById('previewImage');
-            const folderUploadCheck = document.getElementById('folderUpload');
-            const generateButton = document.getElementById('generateEmbed');
-            const linkResult = document.getElementById('linkResult');
-            const generatedLink = document.getElementById('generatedLink');
-            const copyButton = document.getElementById('copyButton');
-            const copySuccess = document.getElementById('copySuccess');
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const filesList = document.getElementById('filesList');
+        const embedTitle = document.getElementById('embedTitle');
+        const author = document.getElementById('author');
+        const embedDescription = document.getElementById('embedDescription');
+        const previewTitle = document.getElementById('previewTitle');
+        const authorName = document.getElementById('authorName');
+        const authorIcon = document.getElementById('authorIcon');
+        const previewDescription = document.getElementById('previewDescription');
+        const previewImage = document.getElementById('previewImage');
+        const folderUploadCheck = document.getElementById('folderUpload');
+        const generateButton = document.getElementById('generateEmbed');
+        const linkResult = document.getElementById('linkResult');
+        const generatedLink = document.getElementById('generatedLink');
+        const copyButton = document.getElementById('copyButton');
+        const copySuccess = document.getElementById('copySuccess');
+        
+        // Files storage
+        const files = [];
+        let hasImageFile = false;
+        
+        // Generate logo data URL for author icon
+        const svgLogo = document.querySelector('.logo-svg').outerHTML;
+        const logoDataUrl = 'data:image/svg+xml;base64,' + btoa(svgLogo);
+        
+        // Set author icon
+        authorIcon.src = logoDataUrl;
+        
+        // Update preview on input change
+        embedTitle.addEventListener('input', function() {
+            previewTitle.textContent = this.value || '1G1V UPLOADS';
+        });
+        
+        author.addEventListener('input', function() {
+            authorName.textContent = this.value || '1g1v';
+        });
+        
+        embedDescription.addEventListener('input', function() {
+            if (this.value) {
+                previewDescription.textContent = this.value;
+                previewDescription.style.display = 'block';
+            } else {
+                previewDescription.style.display = 'none';
+            }
+        });
+        
+        // Enable folder uploads on checkbox change
+        folderUploadCheck.addEventListener('change', function() {
+            fileInput.webkitdirectory = this.checked;
+        });
+        
+        // Open file picker when clicking drop area
+        dropArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        // Handle drag over event
+        dropArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--accent)';
+            this.style.backgroundColor = 'rgba(109, 40, 217, 0.05)';
+        });
+        
+        // Handle drag leave event
+        dropArea.addEventListener('dragleave', function() {
+            this.style.borderColor = 'var(--border-color)';
+            this.style.backgroundColor = 'rgba(15, 23, 42, 0.3)';
+        });
+        
+        // Handle drop event
+        dropArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--border-color)';
+            this.style.backgroundColor = 'rgba(15, 23, 42, 0.3)';
             
-            // Get GitHub username from URL or use placeholder
-            const getGitHubUsername = () => {
-                // Try to extract from current URL (if already deployed to GitHub Pages)
-                const currentUrl = window.location.hostname;
-                if (currentUrl.includes('github.io')) {
-                    return currentUrl.split('.')[0];
-                }
-                // Default to placeholder - user will need to replace this with their GitHub username
-                return '615b';
-            };
-            
-            const githubUsername = getGitHubUsername();
-            const repoName = '1g1v-uploads'; // Use your actual repo name here
-            
-            // Files storage
-            const files = [];
-            let hasImageFile = false;
-            
-            // Generate logo data URL for author icon
-            const svgLogo = document.querySelector('.logo-svg').outerHTML;
-            const logoDataUrl = 'data:image/svg+xml;base64,' + btoa(svgLogo);
-            
-            // Set author icon
-            authorIcon.src = logoDataUrl;
-            
-            // Update preview on input change
-            embedTitle.addEventListener('input', function() {
-                previewTitle.textContent = this.value || '1G1V UPLOADS';
-            });
-            
-            author.addEventListener('input', function() {
-                authorName.textContent = this.value || '1g1v';
-            });
-            
-            embedDescription.addEventListener('input', function() {
-                if (this.value) {
-                    previewDescription.textContent = this.value;
-                    previewDescription.style.display = 'block';
-                } else {
-                    previewDescription.style.display = 'none';
-                }
-            });
-            
-            // Enable folder uploads on checkbox change
-            folderUploadCheck.addEventListener('change', function() {
-                fileInput.webkitdirectory = this.checked;
-            });
-            
-            // Open file picker when clicking drop area
-            dropArea.addEventListener('click', function() {
-                fileInput.click();
-            });
-            
-            // Handle drag over event
-            dropArea.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.style.borderColor = 'var(--accent)';
-                this.style.backgroundColor = 'rgba(109, 40, 217, 0.05)';
-            });
-            
-            // Handle drag leave event
-            dropArea.addEventListener('dragleave', function() {
-                this.style.borderColor = 'var(--border-color)';
-                this.style.backgroundColor = 'rgba(15, 23, 42, 0.3)';
-            });
-            
-            // Handle drop event
-            dropArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.style.borderColor = 'var(--border-color)';
-                this.style.backgroundColor = 'rgba(15, 23, 42, 0.3)';
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        // Handle file selection from input
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+        
+        // Process the selected files
+        function handleFiles(selectedFiles) {
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
                 
-                handleFiles(e.dataTransfer.files);
-            });
-            
-            // Handle file selection from input
-            fileInput.addEventListener('change', function() {
-                handleFiles(this.files);
-            });
-            
-            // Process the selected files
-            function handleFiles(selectedFiles) {
-                for (let i = 0; i < selectedFiles.length; i++) {
-                    const file = selectedFiles[i];
+                // Check if file already exists
+                if (!files.some(f => f.name === file.name && f.size === file.size)) {
+                    files.push(file);
                     
-                    // Check if file already exists
-                    if (!files.some(f => f.name === file.name && f.size === file.size)) {
-                        files.push(file);
-                        
-                        // Add file to the list
-                        const fileItem = document.createElement('div');
-                        fileItem.className = 'file-item';
-                        
-                        const fileName = document.createElement('div');
-                        fileName.className = 'file-name';
-                        fileName.textContent = file.name;
-                        
-                        const fileSize = document.createElement('div');
-                        fileSize.className = 'file-size';
-                        fileSize.textContent = formatSize(file.size);
-                        
-                        const removeButton = document.createElement('button');
-                        removeButton.className = 'remove-file';
-                        removeButton.textContent = '×';
-                        removeButton.addEventListener('click', function() {
-                            const index = files.findIndex(f => f.name === file.name && f.size === file.size);
-                            if (index !== -1) {
-                                // Check if removing an image file
-                                if (file.type.startsWith('image/')) {
-                                    // Look for another image file
-                                    const hasAnotherImage = files.some((f, idx) => 
-                                        idx !== index && f.type.startsWith('image/')
-                                    );
-                                    
-                                    if (!hasAnotherImage) {
-                                        hasImageFile = false;
-                                        previewImage.style.display = 'none';
-                                        previewImage.src = '';
-                                    }
-                                }
+                    // Add file to the list
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    
+                    const fileName = document.createElement('div');
+                    fileName.className = 'file-name';
+                    fileName.textContent = file.name;
+                    
+                    const fileSize = document.createElement('div');
+                    fileSize.className = 'file-size';
+                    fileSize.textContent = formatSize(file.size);
+                    
+                    const removeButton = document.createElement('button');
+                    removeButton.className = 'remove-file';
+                    removeButton.textContent = '×';
+                    removeButton.addEventListener('click', function() {
+                        const index = files.findIndex(f => f.name === file.name && f.size === file.size);
+                        if (index !== -1) {
+                            // Check if removing an image file
+                            if (file.type.startsWith('image/')) {
+                                // Look for another image file
+                                const hasAnotherImage = files.some((f, idx) => 
+                                    idx !== index && f.type.startsWith('image/')
+                                );
                                 
-                                files.splice(index, 1);
+                                if (!hasAnotherImage) {
+                                    hasImageFile = false;
+                                    previewImage.style.display = 'none';
+                                    previewImage.src = '';
+                                }
                             }
-                            fileItem.remove();
-                        });
-                        
-                        fileItem.appendChild(fileName);
-                        fileItem.appendChild(fileSize);
-                        fileItem.appendChild(removeButton);
-                        filesList.appendChild(fileItem);
-                        
-                        // If it's an image, use it for preview
-                        if (file.type.startsWith('image/')) {
-                            hasImageFile = true;
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                previewImage.src = e.target.result;
-                                previewImage.style.display = 'block';
-                            };
-                            reader.readAsDataURL(file);
+                            
+                            files.splice(index, 1);
                         }
+                        fileItem.remove();
+                    });
+                    
+                    fileItem.appendChild(fileName);
+                    fileItem.appendChild(fileSize);
+                    fileItem.appendChild(removeButton);
+                    filesList.appendChild(fileItem);
+                    
+                    // If it's an image, use it for preview
+                    if (file.type.startsWith('image/')) {
+                        hasImageFile = true;
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImage.src = e.target.result;
+                            previewImage.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
                     }
                 }
             }
-            
-            // Format file size
-            function formatSize(bytes) {
-                if (bytes < 1024) return bytes + ' B';
-                else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-                else return (bytes / 1048576).toFixed(1) + ' MB';
-            }
-            
-            // Generate a random string for the URL
-            function generateRandomString(length = 8) {
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                let result = '';
-                for (let i = 0; i < length; i++) {
-                    result += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                return result;
-            }
-            
-            // Handle copy button click
-            copyButton.addEventListener('click', function() {
-                navigator.clipboard.writeText(generatedLink.textContent)
-                    .then(() => {
-                        copySuccess.style.display = 'block';
-                        setTimeout(() => {
-                            copySuccess.style.display = 'none';
-                        }, 3000);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy: ', err);
-                        alert('Failed to copy to clipboard. Please copy the link manually.');
-                    });
-            });
-            
-            // Handle generate button click
-generateButton.addEventListener('click', async function() {
-    if (files.length === 0) {
-        alert('Please select at least one file to upload.');
-        return;
-    }
-
-    const file = files[0]; // Assuming single file upload
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async function () {
-        const base64Data = reader.result.split(',')[1];
-
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ file: base64Data, filename: file.name }),
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            generatedLink.textContent = `https://615b-github-io.vercel.app${result.url}`;
-            linkResult.style.display = 'block';
-        } else {
-            alert('Upload failed');
         }
-    };
-});
-
-                    .then(() => {
-                        copySuccess.style.display = 'block';
-                        setTimeout(() => {
-                            copySuccess.style.display = 'none';
-                        }, 3000);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy: ', err);
-                    });
-                    
-                // In a real implementation, you would need to handle the actual file upload here
-                // For GitHub Pages, you would typically need a backend service to handle file uploads
-                // This is just generating working preview links that follow GitHub Pages URL structure
-            });
+        
+        // Format file size
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        // Handle copy button click
+        copyButton.addEventListener('click', function() {
+            navigator.clipboard.writeText(generatedLink.textContent)
+                .then(() => {
+                    copySuccess.style.display = 'block';
+                    setTimeout(() => {
+                        copySuccess.style.display = 'none';
+                    }, 3000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy to clipboard. Please copy the link manually.');
+                });
         });
-    </script>
+        
+        // Handle generate button click
+        generateButton.addEventListener('click', async function() {
+            if (files.length === 0) {
+                alert('Please select at least one file to upload.');
+                return;
+            }
+
+            const file = files[0]; // Assuming single file upload
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function () {
+                const base64Data = reader.result.split(',')[1];
+
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file: base64Data, filename: file.name }),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    generatedLink.textContent = `https://615b-github-io.vercel.app${result.url}`;
+                    linkResult.style.display = 'block';
+                } else {
+                    alert('Upload failed');
+                }
+            };
+        });
+    });
+</script>
 </body>
 </html>
